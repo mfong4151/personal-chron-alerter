@@ -19,7 +19,6 @@ public final class DailyScheduler {
         ZonedDateTime now = ZonedDateTime.now(zoneId);
         ZonedDateTime next = now.with(localTime);
         if (!next.isAfter(now)) next = next.plusDays(1);
-
         long delayMs = Duration.between(now, next).toMillis();
 
         exec.schedule(() -> {
