@@ -17,10 +17,7 @@ public final class ChronRoutine{
     }
 
     public void run(LocalDate day) {
-        // MVP: placeholder logic
-        double value = 92.3;
-        double threshold = 90.0;
-
+        
         String msg = "Test";
 
         notifier.send(msg);

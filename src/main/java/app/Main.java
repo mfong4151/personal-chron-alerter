@@ -3,6 +3,8 @@ package app;
 import java.time.*;
 import java.util.concurrent.Executors;
 import app.utils.Env;
+import app.utils.PromptUtils;
+
 import java.util.Optional;
 
 public class Main {
@@ -25,6 +27,11 @@ public class Main {
     // Optional: send a boot message so you know it started
     notifier.send("🟢 Pi alerts service started. Daily run at " + runAt + " " + zone);
 
+    System.out.println(PromptUtils.getStockGapPrompt());
+
+    if (true){
+      return ;
+    }
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r);
