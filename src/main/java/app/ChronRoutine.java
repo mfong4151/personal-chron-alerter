@@ -21,9 +21,7 @@ public final class ChronRoutine{
         double value = 92.3;
         double threshold = 90.0;
 
-        String msg = (value > threshold)
-                ? "🚨 Daily check for " + day + ": value " + value + " > " + threshold
-                : "✅ Daily check for " + day + ": all good.";
+        String msg = "Test";
 
         notifier.send(msg);
     }
