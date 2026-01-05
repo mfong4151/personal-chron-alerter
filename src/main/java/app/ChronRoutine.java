@@ -2,6 +2,8 @@ package app;
 
 import java.time.LocalDate;
 
+import app.utils.PromptUtils;
+
 
 /**
 * Executes a daily chron routine, contains the conditions for:
@@ -17,9 +19,10 @@ public final class ChronRoutine{
     }
 
     public void run(LocalDate day) {
-        
-        String msg = "Test";
+        final String prompt = PromptUtils.getStockGapPrompt();
 
-        notifier.send(msg);
+
+        
+        notifier.send(prompt);
     }
 }
