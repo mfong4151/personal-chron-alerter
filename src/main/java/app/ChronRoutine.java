@@ -1,11 +1,8 @@
 package app;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
-import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
-import com.openai.models.responses.Response;
 
 import app.clients.OpenAiClient;
 import app.utils.PromptUtils;

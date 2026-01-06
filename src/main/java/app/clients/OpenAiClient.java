@@ -37,9 +37,7 @@ public class OpenAiClient {
           .map(first -> first.asMessage())
           .map(message -> message.content())
           .map(content -> content.get(0))
-          .map(firstContent -> firstContent.outputText())
-          .filter(outputText -> outputText.isPresent())
-          .map(outputText -> outputText.get())
+          .flatMap(firstContent -> firstContent.outputText())
           .map(responseOutputText -> responseOutputText.text())
           .orElse("");
   }
