@@ -33,13 +33,13 @@ public class OpenAiClient {
    */
   public static String fromChatGptResponseToString(Response response){
     return  Optional.ofNullable(response.output())
-          .map(output -> output.get(0))
-          .map(first -> first.asMessage())
-          .map(message -> message.content())
-          .map(content -> content.get(0))
-          .flatMap(firstContent -> firstContent.outputText())
-          .map(responseOutputText -> responseOutputText.text())
-          .orElse("");
+        .map(output -> output.get(0))
+        .map(first -> first.asMessage())
+        .map(message -> message.content())
+        .map(content -> content.get(0))
+        .flatMap(firstContent -> firstContent.outputText())
+        .map(responseOutputText -> responseOutputText.text())
+        .orElse("");
   }
 
 }
