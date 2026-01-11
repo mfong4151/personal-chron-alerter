@@ -32,16 +32,7 @@ public class Main {
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
     ChronRoutine routine = new ChronRoutine(notifier, openAiApiClient);
 
-    String testPrompt = "What sound does the fox make?";
-    String res = OpenAiApiClient.fromChatGptResponseToString(
-      openAiApiClient.getChatGPTResponse(testPrompt, ChatModel.GPT_5_2_CHAT_LATEST ));
 
-    System.out.println(res);
-    if(true){
-      return ;
-    }
-
-    
     // TODO remove on confirmation,  Optional: send a boot message so you know it started
     notifier.send("🟢 Pi alerts service started. Daily run at " + runAt + " " + zone);
 

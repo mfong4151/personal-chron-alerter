@@ -8,6 +8,8 @@ import com.openai.models.ChatModel;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseOutputItem;
+import com.openai.models.responses.ResponseOutputMessage;
+
 
 public class OpenAiApiClient {
   private final OpenAIClient client;
@@ -34,15 +36,18 @@ public class OpenAiApiClient {
    */
   public static String fromChatGptResponseToString(Response response) {
    return Optional.ofNullable(response.output())
-        .flatMap(output -> { 
-          return output
+        .flatMap(output ->  output
           .stream()
-          .filter(outputItem -> outputItem.isMessage())
-          .findFirst();
-        })
-        .map(first -> first.asMessage())
-        .map(message -> message.content())
-        .map(content -> content.get(0))
+          .filter(ResponseOutputItem::isMessage)
+          .findFirst()
+        )
+        .map(ResponseOutputItem::asMessage)
+        .map(ResponseOutputMessage::content)
+        .flatMap(content -> content
+          .stream()
+          .filter(ResponseOutputMessage.Content::isOutputText)
+          .findFirst()
+        )
         .flatMap(firstContent -> firstContent.outputText())
         .map(responseOutputText -> responseOutputText.text())
         .orElse("Error retrieving LLM response for routine");
