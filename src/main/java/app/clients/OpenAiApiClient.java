@@ -7,6 +7,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.ChatModel;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.ResponseOutputItem;
 
 public class OpenAiApiClient {
   private final OpenAIClient client;
@@ -31,9 +32,14 @@ public class OpenAiApiClient {
   /** 
    * TODO: I'm not sure this needs to live here, but for the mean time im leaving this here 
    */
-  public static String fromChatGptResponseToString(Response response){
+  public static String fromChatGptResponseToString(Response response) {
    return Optional.ofNullable(response.output())
-        .map(output -> output.get(0))
+        .flatMap(output -> { 
+          return output
+          .stream()
+          .filter(outputItem -> outputItem.isMessage())
+          .findFirst();
+        })
         .map(first -> first.asMessage())
         .map(message -> message.content())
         .map(content -> content.get(0))
