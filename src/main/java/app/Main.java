@@ -10,25 +10,27 @@ import app.utils.Env;
 import java.util.Optional;
 
 public class Main {
-  private static final String DEFAULT_TIME = "06:00";
+  private static final String DEFAULT_TIME = "06:30";
   private static final String APP_TZ = "APP_TZ";
   private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
   private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
+  private static final String DOT_ENV = "DOT_ENV";
+  private static final String RUN_AT = "RUN_AT";
+
   public static void main(String[] args) {
 
-    var dotenv = Env.load(java.nio.file.Path.of(".env"));
+    var dotenv = Env.load(java.nio.file.Path.of(DOT_ENV));
 
     ZoneId zone = ZoneId.of(
         Env.get(APP_TZ, dotenv) != null ? Env.get(APP_TZ, dotenv) : "America/Los_Angeles");
 
-    String runAtStr = Optional.ofNullable(Env.get("RUN_AT", dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
+    String runAtStr = Optional.ofNullable(Env.get(RUN_AT, dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
     String openAiApiKey = Optional.ofNullable(Env.get( OPENAI_API_KEY, dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
     LocalTime runAt = LocalTime.parse(runAtStr);
 
     DiscordNotifier notifier = new DiscordNotifier(Env.get(DISCORD_WEBHOOK_URL, dotenv));
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
     ChronRoutine routine = new ChronRoutine(notifier, openAiApiClient);
-
 
     // TODO remove on confirmation,  Optional: send a boot message so you know it started
     notifier.send("🟢 Pi alerts service started. Daily run at " + runAt + " " + zone);
