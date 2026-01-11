@@ -3,7 +3,7 @@ package app;
 import java.time.*;
 import java.util.concurrent.Executors;
 
-import app.clients.OpenAiClient;
+import app.clients.OpenAiApiClient;
 import app.utils.Env;
 import app.utils.PromptUtils;
 
@@ -24,7 +24,7 @@ public class Main {
     LocalTime runAt = LocalTime.parse(runAtStr);
 
     DiscordNotifier notifier = new DiscordNotifier(Env.get("DISCORD_WEBHOOK_URL", dotenv));
-    OpenAiClient openAiClient = new OpenAiClient();
+    OpenAiApiClient openAiClient = new OpenAiApiClient();
     ChronRoutine routine = new ChronRoutine(notifier, openAiClient);
 
     // Optional: send a boot message so you know it started

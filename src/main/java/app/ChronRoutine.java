@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import com.openai.models.ChatModel;
 
-import app.clients.OpenAiClient;
+import app.clients.OpenAiApiClient;
 import app.utils.PromptUtils;
 
 
@@ -16,17 +16,17 @@ import app.utils.PromptUtils;
 */
 public final class ChronRoutine{
     private final DiscordNotifier notifier;
-    private final OpenAiClient openAiClient;
+    private final OpenAiApiClient openAiApiClient;
 
-    public ChronRoutine(DiscordNotifier notifier, OpenAiClient openAiClient) {
+    public ChronRoutine(DiscordNotifier notifier, OpenAiApiClient openAiApiClient) {
         this.notifier = notifier;
-        this.openAiClient = openAiClient;
+        this.openAiApiClient = openAiApiClient;
     }
 
     public void run(LocalDate day) {
         final String prompt = PromptUtils.getStockGapPrompt();
-        final String result = OpenAiClient.fromChatGptResponseToString( 
-          openAiClient.getChatGPTResponse(prompt, ChatModel.GPT_5_CHAT_LATEST)
+        final String result = OpenAiApiClient.fromChatGptResponseToString( 
+          openAiApiClient.getChatGPTResponse(prompt, ChatModel.GPT_5_CHAT_LATEST)
         );
 
         notifier.send(result);

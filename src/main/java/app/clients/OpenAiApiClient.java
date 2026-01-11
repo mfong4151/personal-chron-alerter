@@ -8,10 +8,10 @@ import com.openai.models.ChatModel;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 
-public class OpenAiClient {
+public class OpenAiApiClient {
   private final OpenAIClient client;
 
-  public OpenAiClient (){
+  public OpenAiApiClient (){
     this.client =  OpenAIOkHttpClient.fromEnv();
   }
   
