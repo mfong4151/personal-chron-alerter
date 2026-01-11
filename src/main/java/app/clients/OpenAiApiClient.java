@@ -11,8 +11,8 @@ import com.openai.models.responses.ResponseCreateParams;
 public class OpenAiApiClient {
   private final OpenAIClient client;
 
-  public OpenAiApiClient (){
-    this.client =  OpenAIOkHttpClient.fromEnv();
+  public OpenAiApiClient (String apiKey){
+    this.client =  OpenAIOkHttpClient.builder().apiKey(apiKey).build();
   }
   
   /**
@@ -32,14 +32,13 @@ public class OpenAiApiClient {
    * TODO: I'm not sure this needs to live here, but for the mean time im leaving this here 
    */
   public static String fromChatGptResponseToString(Response response){
-    return  Optional.ofNullable(response.output())
+   return Optional.ofNullable(response.output())
         .map(output -> output.get(0))
         .map(first -> first.asMessage())
         .map(message -> message.content())
         .map(content -> content.get(0))
         .flatMap(firstContent -> firstContent.outputText())
         .map(responseOutputText -> responseOutputText.text())
-        .orElse("");
+        .orElse("Error retrieving LLM response for routine");
   }
-
 }

@@ -3,6 +3,8 @@ package app;
 import java.time.*;
 import java.util.concurrent.Executors;
 
+import com.openai.models.ChatModel;
+
 import app.clients.OpenAiApiClient;
 import app.utils.Env;
 import app.utils.PromptUtils;
@@ -12,24 +14,36 @@ import java.util.Optional;
 public class Main {
   private static final String DEFAULT_TIME = "09:00";
   // private static final String DEFAULT_TIME = "05:30";
+  private static final String APP_TZ = "APP_TZ";
+  private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
+  private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
   public static void main(String[] args) {
 
     var dotenv = Env.load(java.nio.file.Path.of(".env"));
 
     ZoneId zone = ZoneId.of(
-        Env.get("APP_TZ", dotenv) != null ? Env.get("APP_TZ", dotenv) : "America/Los_Angeles");
+        Env.get(APP_TZ, dotenv) != null ? Env.get(APP_TZ, dotenv) : "America/Los_Angeles");
 
     String runAtStr = Optional.ofNullable(Env.get("RUN_AT", dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
-
+    String openAiApiKey = Optional.ofNullable(Env.get( OPENAI_API_KEY, dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
     LocalTime runAt = LocalTime.parse(runAtStr);
 
-    DiscordNotifier notifier = new DiscordNotifier(Env.get("DISCORD_WEBHOOK_URL", dotenv));
-    OpenAiApiClient openAiClient = new OpenAiApiClient();
-    ChronRoutine routine = new ChronRoutine(notifier, openAiClient);
+    DiscordNotifier notifier = new DiscordNotifier(Env.get(DISCORD_WEBHOOK_URL, dotenv));
+    OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
+    ChronRoutine routine = new ChronRoutine(notifier, openAiApiClient);
 
-    // Optional: send a boot message so you know it started
+    String testPrompt = "What sound does the fox make?";
+    String res = OpenAiApiClient.fromChatGptResponseToString(
+      openAiApiClient.getChatGPTResponse(testPrompt, ChatModel.GPT_5_2_CHAT_LATEST ));
+
+    System.out.println(res);
+    if(true){
+      return ;
+    }
+
+    
+    // TODO remove on confirmation,  Optional: send a boot message so you know it started
     notifier.send("🟢 Pi alerts service started. Daily run at " + runAt + " " + zone);
-
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r);
