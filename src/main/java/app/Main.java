@@ -3,17 +3,14 @@ package app;
 import java.time.*;
 import java.util.concurrent.Executors;
 
-import com.openai.models.ChatModel;
 
 import app.clients.OpenAiApiClient;
 import app.utils.Env;
-import app.utils.PromptUtils;
 
 import java.util.Optional;
 
 public class Main {
-  private static final String DEFAULT_TIME = "09:00";
-  // private static final String DEFAULT_TIME = "05:30";
+  private static final String DEFAULT_TIME = "06:00";
   private static final String APP_TZ = "APP_TZ";
   private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
   private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";

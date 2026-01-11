@@ -51,5 +51,5 @@ public class OpenAiApiClient {
         .flatMap(firstContent -> firstContent.outputText())
         .map(responseOutputText -> responseOutputText.text())
         .orElse("Error retrieving LLM response for routine");
-  }
+    }
 }

@@ -34,7 +34,8 @@ public final class PromptUtils {
   public static String getStockGapPrompt(){
 
     String roleText = loadResource(STOCK_RESEARCH_ROLE_PATH);
-    String promptText = String.format(loadResource(STOCK_ALERTS_PROMPT_PATH), LocalDate.now().toString() );
-    return String.join(LINE_BREAK, roleText, promptText);
+    String promptText1 = String.format(loadResource(STOCK_ALERTS_PROMPT_PATH), LocalDate.now().toString() );
+    String promptText2 = "Also " +  loadResource(STOCK_GAP_ALERTS_PROMPT_PATH);
+    return String.join(LINE_BREAK, roleText, promptText1, promptText2);
   }
 }
