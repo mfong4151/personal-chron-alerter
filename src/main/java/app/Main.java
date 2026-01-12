@@ -17,7 +17,7 @@ public class Main {
   private static final String DOT_ENV = "DOT_ENV";
   private static final String RUN_AT = "RUN_AT";
   private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
-
+  private static final String SCHEDULER = "scheduler";
   public static void main(String[] args) {
 
     var dotenv = Env.load(java.nio.file.Path.of(DOT_ENV));
@@ -36,7 +36,7 @@ public class Main {
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r);
-      t.setName("scheduler");
+      t.setName(SCHEDULER);
       t.setDaemon(false);
       return t;
     });
