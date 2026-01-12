@@ -16,16 +16,15 @@ public class Main {
   private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
   private static final String DOT_ENV = "DOT_ENV";
   private static final String RUN_AT = "RUN_AT";
+  private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
 
   public static void main(String[] args) {
 
     var dotenv = Env.load(java.nio.file.Path.of(DOT_ENV));
+    ZoneId zone = ZoneId.of( Optional.ofNullable( Env.get(APP_TZ, dotenv)).orElse(DEFAULT_TIMEZONE));
 
-    ZoneId zone = ZoneId.of(
-        Env.get(APP_TZ, dotenv) != null ? Env.get(APP_TZ, dotenv) : "America/Los_Angeles");
-
-    String runAtStr = Optional.ofNullable(Env.get(RUN_AT, dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
-    String openAiApiKey = Optional.ofNullable(Env.get( OPENAI_API_KEY, dotenv)).map(envVar -> envVar).orElse(DEFAULT_TIME);
+    String runAtStr = Optional.ofNullable(Env.get(RUN_AT, dotenv)).orElse(DEFAULT_TIME);
+    String openAiApiKey = Optional.ofNullable(Env.get( OPENAI_API_KEY, dotenv)).orElse(DEFAULT_TIME);
     LocalTime runAt = LocalTime.parse(runAtStr);
 
     DiscordNotifier notifier = new DiscordNotifier(Env.get(DISCORD_WEBHOOK_URL, dotenv));
