@@ -14,18 +14,20 @@ public final class DailyScheduler {
         this.exec = exec;
     }
 
-    /** Runs task once per day at localTime in zoneId. */
+    /**
+     *  Runs task once per day at localTime in zoneId. 
+     */
     public void scheduleDaily(LocalTime localTime, ZoneId zoneId, Runnable task) {
+
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        if (EXCLUDED_DAY_OF_WEEKS.contains(now.getDayOfWeek())){
+            return;
+        }
         scheduleNext(localTime, zoneId, task);
     }
 
     private void scheduleNext(LocalTime localTime, ZoneId zoneId, Runnable task) {
         ZonedDateTime now = ZonedDateTime.now(zoneId);
-
-        if (EXCLUDED_DAY_OF_WEEKS.contains(now.getDayOfWeek())){
-            return;
-        }
-
         ZonedDateTime next = now.with(localTime);
         if (!next.isAfter(now)) next = next.plusDays(1);
         long delayMs = Duration.between(now, next).toMillis();
