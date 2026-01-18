@@ -1,5 +1,6 @@
 package app;
 
+import java.nio.file.Path;
 import java.time.*;
 import java.util.concurrent.Executors;
 
@@ -7,31 +8,37 @@ import java.util.concurrent.Executors;
 import app.clients.OpenAiApiClient;
 import app.utils.Env;
 
-import java.util.Optional;
+import java.util.Map;
 
 public class Main {
-  private static final String DEFAULT_TIME = "06:30";
+  private static final String DEFAULT_RUN_AT = "06:30";
   private static final String APP_TZ = "APP_TZ";
   private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
   private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
   private static final String DOT_ENV = "DOT_ENV";
+  private static final String DEFAULT_DOT_ENV_PATH = "/home/pi/chron/.env";  
   private static final String RUN_AT = "RUN_AT";
   private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   private static final String SCHEDULER = "scheduler";
   public static void main(String[] args) {
+    Path envPath = Env.getDotEnvPath(DOT_ENV, DEFAULT_DOT_ENV_PATH);
+    Map<String, String> dotenv = Env.load(envPath);
 
-    var dotenv = Env.load(java.nio.file.Path.of(DOT_ENV));
-    ZoneId zone = ZoneId.of( Optional.ofNullable( Env.get(APP_TZ, dotenv)).orElse(DEFAULT_TIMEZONE));
+    ZoneId zone = ZoneId.of(
+        Env.getOrDefault(APP_TZ, dotenv, DEFAULT_TIMEZONE));
 
-    String runAtStr = Optional.ofNullable(Env.get(RUN_AT, dotenv)).orElse(DEFAULT_TIME);
-    String openAiApiKey = Optional.ofNullable(Env.get( OPENAI_API_KEY, dotenv)).orElse(DEFAULT_TIME);
-    LocalTime runAt = LocalTime.parse(runAtStr);
+    LocalTime runAt = LocalTime.parse(
+        Env.getOrDefault(RUN_AT, dotenv, DEFAULT_RUN_AT));
 
-    DiscordNotifier notifier = new DiscordNotifier(Env.get(DISCORD_WEBHOOK_URL, dotenv));
+    String openAiApiKey = Env.getRequired(OPENAI_API_KEY, dotenv);
+
+    String webhookUrl = Env.getRequired(DISCORD_WEBHOOK_URL, dotenv);
+
+
+    DiscordNotifier notifier = new DiscordNotifier(webhookUrl);
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
     ChronRoutine routine = new ChronRoutine(notifier, openAiApiClient);
 
-    // TODO remove on confirmation,  Optional: send a boot message so you know it started
     notifier.send("🟢 Pi alerts service started. Daily run at " + runAt + " " + zone);
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
