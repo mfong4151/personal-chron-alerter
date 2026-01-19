@@ -33,10 +33,6 @@ public class Main {
     String openAiApiKey = Env.getRequired(OPENAI_API_KEY, dotenv);
 
     String webhookUrl = Env.getRequired(DISCORD_WEBHOOK_URL, dotenv);
-
-
-    System.out.println(webhookUrl);
-    System.out.println(openAiApiKey);
     
     DiscordNotifier notifier = new DiscordNotifier(webhookUrl);
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
