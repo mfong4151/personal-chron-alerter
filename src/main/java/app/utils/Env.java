@@ -126,6 +126,25 @@ public final class Env {
     return path.isAbsolute() ? path : path.toAbsolutePath().normalize();
   }
 
+  public static Path findEnvFile() {
+    // Try multiple locations in order of preference
+    String[] candidates = {
+        ".env", // Local development (current directory)
+        "/home/pi/chron/.env" // Raspberry Pi deployment
+    };
+
+    for (String candidate : candidates) {
+      Path path = Path.of(candidate);
+      Path resolved = path.isAbsolute() ? path : path.toAbsolutePath().normalize();
+      if (Files.exists(resolved)) {
+        return resolved;
+      }
+    }
+
+    // Return default if none exist (will be handled gracefully by Env.load)
+    return Path.of(".env").toAbsolutePath();
+  }
+
   // ---------------- helpers ----------------
 
   private static boolean isNonBlank(String s) {
