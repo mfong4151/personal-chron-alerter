@@ -19,7 +19,22 @@ public final class DiscordNotifier {
         this.webhookUri = URI.create(webhookUrl);
     }
 
+
     public void send(String content) {
+      int i = 0;
+      int j = Math.min(2000, content.length());
+
+      while ( i < content.length() ) {
+        String part = content.substring(i, j);
+        sendDiscordMessage(part);
+        i += 2000;
+        j = Math.min(j + 2000, content.length());
+      }
+
+    }
+
+    public void sendDiscordMessage(String content) {
+
         String json = "{\"content\":\"" + escape(content) + "\"}";
 
         HttpRequest req = HttpRequest.newBuilder()

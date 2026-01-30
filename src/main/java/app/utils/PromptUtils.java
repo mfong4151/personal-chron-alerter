@@ -8,7 +8,7 @@ import java.util.Map;
 public final class PromptUtils {
 
   public static final String STOCK_ALERTS_PROMPT_PATH = "prompts/stockAlerts.txt"; 
-  public static final String STOCK_GAP_ALERTS_PROMPT_PATH = "prompts/stockAlerts.txt"; 
+  public static final String STOCK_GAP_ALERTS_PROMPT_PATH = "prompts/stockGapsAlerts.txt"; 
   public static final String STOCK_RESEARCH_ROLE_PATH = "prompts/stockResearcherRole.txt"; 
   public static final String LINE_BREAK = "\n";
 

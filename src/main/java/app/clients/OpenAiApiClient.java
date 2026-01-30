@@ -4,11 +4,15 @@ import java.util.Optional;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonSchemaLocalValidation;
 import com.openai.models.ChatModel;
 import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
+import com.openai.models.responses.WebSearchPreviewTool;
+import com.openai.models.responses.WebSearchTool;
+import com.openai.models.responses.WebSearchTool.Type;
 
 
 public class OpenAiApiClient {
@@ -26,6 +30,9 @@ public class OpenAiApiClient {
     ResponseCreateParams params =  ResponseCreateParams.builder()
       .input(prompt)
       .model(chatModel)
+      .addTool(WebSearchTool.builder()
+            .type(Type.WEB_SEARCH)
+            .build())
       .build();
 
     return client.responses().create(params);

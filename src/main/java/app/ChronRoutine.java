@@ -26,7 +26,7 @@ public final class ChronRoutine{
     public void run(LocalDate day) {
         final String prompt = PromptUtils.getStockGapPrompt();
         final String result = OpenAiApiClient.fromChatGptResponseToString( 
-          openAiApiClient.getChatGPTResponse(prompt, ChatModel.GPT_5_CHAT_LATEST)
+          openAiApiClient.getChatGPTResponse(prompt, ChatModel.GPT_5_2)
         );
 
         notifier.send(result);

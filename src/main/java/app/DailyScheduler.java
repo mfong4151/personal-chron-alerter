@@ -44,6 +44,11 @@ public final class DailyScheduler {
     exec.schedule(() -> {
       try {
         task.run();
+        System.out.println("Task completed successfully at " + ZonedDateTime.now(zoneId));
+      }  catch (Exception e) {
+        System.err.println("Task failed at " + ZonedDateTime.now(zoneId) + ": " + e.getMessage());
+        e.printStackTrace();
+      
       } finally {
         // Always reschedule after completion
         scheduleNext(localTime, zoneId, task);

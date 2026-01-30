@@ -27,7 +27,7 @@ https://chatgpt.com/c/69249324-6a0c-8332-8f99-a0debaaced14
 From your local terminal (WSL / PowerShell / terminal where SSH works):
 
 Using IP (most reliable):
-ssh mfong415@192.168.1.42
+ssh mfong415@192.168.1.47
 
 Or hostname (if resolution works):
 ssh mfong415@maxs-pi.local
