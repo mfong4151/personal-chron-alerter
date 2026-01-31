@@ -4,5 +4,6 @@ I need you to do research on the following:
 If a major index etf ticker, namely QQQ or SPY, is gapping down or up by more than +- .5%% premarket this morning on %s, I need you to scan the web and find the most probable causes why this might be happening.
 
 You should dislay them in the order of most likely reason for causing the price gap. Prefer the addition of links to original news editorials, however if there are online artifacts like tweets or public posts, include a link to that as well.
+If there is something which meets this threshold, then give a guestimate as to if the market will price this in. Give a back-of-the-envelope precentage calculation, cite how have reacted in the past to base this on.
 
 Keep your answers concise if possible, 1-3 sentences per item summarizing the market impact and precentage move. If there was no gap up/down, then simply say "The market did not move past your threshold" for this above inquiry.
