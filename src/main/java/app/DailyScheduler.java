@@ -11,8 +11,16 @@ public final class DailyScheduler {
   private static final Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
   private static final Set<LocalDate> HOLIDAYS = Set.of(
-      LocalDate.of(2026, 1, 1), // New Year's Day
-      LocalDate.of(2026, 12, 25) // Christmas
+      LocalDate.of(2026, 1, 1),   // New Year's Day
+      LocalDate.of(2026, 1, 19),  // Martin Luther King Jr. Day
+      LocalDate.of(2026, 2, 16),  // Presidents' Day
+      LocalDate.of(2026, 4, 3),   // Good Friday
+      LocalDate.of(2026, 5, 25),  // Memorial Day
+      LocalDate.of(2026, 6, 19),  // Juneteenth
+      LocalDate.of(2026, 7, 3),   // Independence Day (observed)
+      LocalDate.of(2026, 9, 7),   // Labor Day
+      LocalDate.of(2026, 11, 26), // Thanksgiving Day
+      LocalDate.of(2026, 12, 25)  // Christmas
   );
 
   public DailyScheduler(ScheduledExecutorService exec) {
