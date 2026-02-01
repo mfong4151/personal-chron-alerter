@@ -10,9 +10,6 @@ public final class DailyScheduler {
 
   private static final Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
-  /**
-   * TODO Add more market holidays 
-   */
   private static final Set<LocalDate> HOLIDAYS = Set.of(
       LocalDate.of(2026, 1, 1), // New Year's Day
       LocalDate.of(2026, 12, 25) // Christmas
@@ -23,55 +20,55 @@ public final class DailyScheduler {
   }
 
   /**
-   * Runs task once per business day at localTime in zoneId.
-   * Weekends and holidays are skipped.
+   * Runs the given task once per day at runAt in zoneId. Excluded days are
+   * skipped.
    */
-  public void scheduleDaily(LocalTime localTime, ZoneId zoneId, Runnable task) {
-    scheduleNext(localTime, zoneId, task);
+  public void scheduleDaily(LocalTime runAt, ZoneId zoneId, Runnable task) {
+    scheduleNext(runAt, zoneId, task);
   }
 
-  private void scheduleNext(LocalTime localTime, ZoneId zoneId, Runnable task) {
+  private static boolean isExcluded(LocalDate date) {
+    return WEEKEND_DAYS.contains(date.getDayOfWeek()) || HOLIDAYS.contains(date);
+  }
+
+  private void scheduleNext(LocalTime runAt, ZoneId zoneId, Runnable task) {
     ZonedDateTime now = ZonedDateTime.now(zoneId);
-    ZonedDateTime next = computeNextRun(now, localTime);
+    ZonedDateTime next = computeNextDailyRun(now, runAt);
 
     long delayMs = Duration.between(now, next).toMillis();
 
-    // Strongly recommended: visible in journalctl
-    System.out.println(
-        "Next run scheduled for " + next +
-            " (" + next.getDayOfWeek() + ")");
+    System.out.println("Next run scheduled for " + next + " (" + next.getDayOfWeek() + ")");
 
     exec.schedule(() -> {
       try {
+        LocalDate today = LocalDate.now(zoneId);
+
+        if (isExcluded(today)) {
+          System.out.println("Skipping routine on excluded day: " + today + " (" + today.getDayOfWeek() + ")");
+          return; // <- key change: we still reschedule in finally
+        }
+
+        System.out.println("RUN START " + ZonedDateTime.now(zoneId));
         task.run();
-        System.out.println("Task completed successfully at " + ZonedDateTime.now(zoneId));
-      }  catch (Exception e) {
-        System.err.println("Task failed at " + ZonedDateTime.now(zoneId) + ": " + e.getMessage());
-        e.printStackTrace();
-      
+        System.out.println("RUN OK " + ZonedDateTime.now(zoneId));
+
+      } catch (Throwable t) {
+        System.err.println("RUN FAIL " + ZonedDateTime.now(zoneId) + " err=" + t);
+        t.printStackTrace(System.err);
+
       } finally {
-        // Always reschedule after completion
-        scheduleNext(localTime, zoneId, task);
+        // Always schedule the next calendar-day run
+        scheduleNext(runAt, zoneId, task);
       }
     }, delayMs, TimeUnit.MILLISECONDS);
   }
 
-  private ZonedDateTime computeNextRun(ZonedDateTime now, LocalTime runAt) {
+  /** Next calendar-day occurrence of runAt in the same zone. */
+  private static ZonedDateTime computeNextDailyRun(ZonedDateTime now, LocalTime runAt) {
     ZonedDateTime candidate = now.with(runAt);
-
-    // If today's run time already passed, move to next day
     if (!candidate.isAfter(now)) {
       candidate = candidate.plusDays(1);
     }
-
-    LocalDate localDate = candidate.toLocalDate();
-
-    Boolean shouldScheduleRoutine = !WEEKEND_DAYS.contains(localDate.getDayOfWeek())
-        && !HOLIDAYS.contains(localDate);
-    while (!shouldScheduleRoutine) {
-      candidate = candidate.plusDays(1);
-    }
-
     return candidate;
   }
 }
