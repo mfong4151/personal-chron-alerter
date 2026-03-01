@@ -62,7 +62,7 @@ public class Main {
       premarketStockRoutine.run(day);
     });
     
-    scheduler.scheduleDaily(runAt, zone, List.of(WEEKDAY_DAYS, Set.of(DayOfWeek.SATURDAY)), List.of(), () -> {
+    scheduler.scheduleDaily(LocalTime.of(15, 30), zone, List.of(WEEKDAY_DAYS, Set.of(DayOfWeek.SATURDAY)), List.of(), () -> {
       LocalDate day = LocalDate.now(zone).minusDays(1);
       sundayMarketRoutine.run(day);
     });

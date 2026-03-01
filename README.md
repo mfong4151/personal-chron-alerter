@@ -69,7 +69,7 @@ Simple flow:
 
 On your dev machine:
 ./gradlew shadowJar
-scp build/libs/*-all.jar mfong415@<PI_IP>:/home/mfong415/chron/chron.jar
+scp build/libs/*-all.jar mfong415@192.168.1.47:/home/mfong415/chron/chron.jar
 
 On the Pi:
 sudo systemctl restart chron
