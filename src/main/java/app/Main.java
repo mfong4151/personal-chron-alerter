@@ -6,9 +6,15 @@ import java.util.concurrent.Executors;
 
 
 import app.clients.OpenAiApiClient;
+import app.routines.PremarketStockRoutine;
+import app.routines.TodoChronRoutine;
 import app.utils.Env;
 
+import java.util.List;
 import java.util.Map;
+
+
+import static app.DailyScheduler.*;
 
 public class Main {
   private static final String DEFAULT_RUN_AT = "06:30";
@@ -18,8 +24,7 @@ public class Main {
   private static final String RUN_AT = "RUN_AT";
   private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   private static final String SCHEDULER = "scheduler";
-  
-
+  private static final String TODO_WEBHOOK_URL = "https://discord.com/api/webhooks/1477708589400588561/OeRjqcWc4MLPtRQ1RBiLpY2R5VbSqMmLO50aEMDnRpjHqEVyniJefCKBxFrUS2TPEWoZ";
   
   public static void main(String[] args) {
     Path envPath = Env.findEnvFile();
@@ -37,7 +42,8 @@ public class Main {
     
     DiscordNotifier notifier = new DiscordNotifier(webhookUrl);
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
-    ChronRoutine routine = new ChronRoutine(notifier, openAiApiClient);
+    PremarketStockRoutine premarketStockRoutine = new PremarketStockRoutine(notifier, openAiApiClient);
+    TodoChronRoutine todoRoutine = new TodoChronRoutine(new DiscordNotifier(TODO_WEBHOOK_URL));
 
     notifier.send("🟢 Sanity check log, pi is operational");
 
@@ -50,9 +56,14 @@ public class Main {
 
     DailyScheduler scheduler = new DailyScheduler(exec);
 
-    scheduler.scheduleDaily(runAt, zone, () -> {
+    scheduler.scheduleDaily(runAt, zone, List.of(WEEKEND_DAYS), List.of(HOLIDAYS), () -> {
       LocalDate day = LocalDate.now(zone).minusDays(1); // "yesterday"
-      routine.run(day);
+      premarketStockRoutine.run(day);
+    });
+
+    scheduler.scheduleDaily(LocalTime.of(6, 0), zone, List.of(WEEKEND_DAYS), List.of(), () -> {
+      LocalDate day = LocalDate.now(zone).minusDays(1);
+      todoRoutine.run(day);
     });
   }
 }

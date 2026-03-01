@@ -1,6 +1,7 @@
 package app;
 
 import java.time.*;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -8,9 +9,9 @@ public final class DailyScheduler {
 
   private final ScheduledExecutorService exec;
 
-  private static final Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+  public static final Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
-  private static final Set<LocalDate> HOLIDAYS = Set.of(
+  public static final Set<LocalDate> HOLIDAYS = Set.of(
       LocalDate.of(2026, 1, 1),   // New Year's Day
       LocalDate.of(2026, 1, 19),  // Martin Luther King Jr. Day
       LocalDate.of(2026, 2, 16),  // Presidents' Day
@@ -31,15 +32,16 @@ public final class DailyScheduler {
    * Runs the given task once per day at runAt in zoneId. Excluded days are
    * skipped.
    */
-  public void scheduleDaily(LocalTime runAt, ZoneId zoneId, Runnable task) {
-    scheduleNext(runAt, zoneId, task);
+  public void scheduleDaily(LocalTime runAt, ZoneId zoneId, List<Set<DayOfWeek>> dayOfWeekExclusions, List<Set<LocalDate>> dateExclusions, Runnable task ) {
+    scheduleNext(runAt, zoneId, task, dayOfWeekExclusions, dateExclusions);
   }
 
-  private static boolean isExcluded(LocalDate date) {
-    return WEEKEND_DAYS.contains(date.getDayOfWeek()) || HOLIDAYS.contains(date);
+  private static boolean isExcluded(LocalDate date, List<Set<DayOfWeek>> dayOfWeekExclusions, List<Set<LocalDate>> dateExclusions) {
+    return dayOfWeekExclusions.stream().anyMatch(exclusionSet -> exclusionSet.contains(date.getDayOfWeek()))
+     || dateExclusions.stream().anyMatch(exclusionSet -> exclusionSet.contains(date)); 
   }
 
-  private void scheduleNext(LocalTime runAt, ZoneId zoneId, Runnable task) {
+  private void scheduleNext(LocalTime runAt, ZoneId zoneId, Runnable task, List<Set<DayOfWeek>> dayOfWeekExclusions, List<Set<LocalDate>> dateExclusions) {
     ZonedDateTime now = ZonedDateTime.now(zoneId);
     ZonedDateTime next = computeNextDailyRun(now, runAt);
 
@@ -51,7 +53,7 @@ public final class DailyScheduler {
       try {
         LocalDate today = LocalDate.now(zoneId);
 
-        if (isExcluded(today)) {
+        if (isExcluded(today, dayOfWeekExclusions, dateExclusions)) {
           System.out.println("Skipping routine on excluded day: " + today + " (" + today.getDayOfWeek() + ")");
           return; // <- key change: we still reschedule in finally
         }
@@ -66,7 +68,7 @@ public final class DailyScheduler {
 
       } finally {
         // Always schedule the next calendar-day run
-        scheduleNext(runAt, zoneId, task);
+        scheduleNext(runAt, zoneId, task, dayOfWeekExclusions, dateExclusions);
       }
     }, delayMs, TimeUnit.MILLISECONDS);
   }

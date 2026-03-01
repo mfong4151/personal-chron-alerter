@@ -74,3 +74,11 @@ scp build/libs/*-all.jar mfong415@<PI_IP>:/home/mfong415/chron/chron.jar
 On the Pi:
 sudo systemctl restart chron
 
+
+### Figuring out ram usage
+
+free -h
+
+### Memory usage
+
+df -h
