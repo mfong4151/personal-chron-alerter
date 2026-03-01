@@ -10,6 +10,7 @@ public final class PromptUtils {
   public static final String STOCK_ALERTS_PROMPT_PATH = "prompts/stockAlerts.txt"; 
   public static final String STOCK_GAP_ALERTS_PROMPT_PATH = "prompts/stockGapsAlerts.txt"; 
   public static final String STOCK_RESEARCH_ROLE_PATH = "prompts/stockResearcherRole.txt"; 
+  public static final String SUNDAY_RESEARCH_PROMPT_PATH = "prompts/sundayStockNews.txt"; 
   public static final String LINE_BREAK = "\n";
 
   public static String loadResource(String path) {
@@ -37,5 +38,11 @@ public final class PromptUtils {
     String promptText1 = String.format(loadResource(STOCK_ALERTS_PROMPT_PATH), LocalDate.now().toString() );
     String promptText2 = "Also " +  loadResource(STOCK_GAP_ALERTS_PROMPT_PATH);
     return String.join(LINE_BREAK, roleText, promptText1, promptText2);
+  }
+
+  public static String getSundayStoryResearchPrompt(){
+    String roleText = loadResource(STOCK_RESEARCH_ROLE_PATH);
+    String promptText = loadResource(SUNDAY_RESEARCH_PROMPT_PATH);
+    return String.join(LINE_BREAK, roleText, promptText);
   }
 }

@@ -11,6 +11,8 @@ public final class DailyScheduler {
 
   public static final Set<DayOfWeek> WEEKEND_DAYS = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
+  public static final Set<DayOfWeek> WEEKDAY_DAYS = Set.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+  
   public static final Set<LocalDate> HOLIDAYS = Set.of(
       LocalDate.of(2026, 1, 1),   // New Year's Day
       LocalDate.of(2026, 1, 19),  // Martin Luther King Jr. Day

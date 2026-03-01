@@ -1,0 +1,7 @@
+Good Sunday sir! It's the Sunday before the market opens, and I want to check how the market is doing before it opens. Couple of things I want you to do:
+- Figure out what the futures are looking like. I'd like to know what the S&P futures and NASDAQ futures are doing in particular
+- Show me the top 5 most important stock market stories that I should be following. These are stories that probablistically would move the market.   
+
+Return an overall summary with an upper limit of 1000 words. This is not including the news links, which should be attached below the summary.
+
+For reference, today's date is:

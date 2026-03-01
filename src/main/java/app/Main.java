@@ -7,12 +7,13 @@ import java.util.concurrent.Executors;
 
 import app.clients.OpenAiApiClient;
 import app.routines.PremarketStockRoutine;
+import app.routines.SundayMarketRoutine;
 import app.routines.TodoChronRoutine;
 import app.utils.Env;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 
 import static app.DailyScheduler.*;
 
@@ -43,8 +44,8 @@ public class Main {
     DiscordNotifier todoNotifier = new DiscordNotifier(Env.getRequired(TODO_WEBHOOK_URL, dotenv));
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
     PremarketStockRoutine premarketStockRoutine = new PremarketStockRoutine(notifier, openAiApiClient);
+    SundayMarketRoutine sundayMarketRoutine = new SundayMarketRoutine(notifier, openAiApiClient);
     TodoChronRoutine todoRoutine = new TodoChronRoutine(todoNotifier);
-
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r);
@@ -59,6 +60,11 @@ public class Main {
     scheduler.scheduleDaily(runAt, zone, List.of(WEEKEND_DAYS), List.of(HOLIDAYS), () -> {
       LocalDate day = LocalDate.now(zone).minusDays(1); // "yesterday"
       premarketStockRoutine.run(day);
+    });
+    
+    scheduler.scheduleDaily(runAt, zone, List.of(WEEKDAY_DAYS, Set.of(DayOfWeek.SATURDAY)), List.of(), () -> {
+      LocalDate day = LocalDate.now(zone).minusDays(1);
+      sundayMarketRoutine.run(day);
     });
 
     notifier.send("🟢 Sanity check log, pi is operational");
