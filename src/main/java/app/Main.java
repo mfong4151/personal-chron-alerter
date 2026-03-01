@@ -20,11 +20,11 @@ public class Main {
   private static final String DEFAULT_RUN_AT = "06:30";
   private static final String APP_TZ = "APP_TZ";
   private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
-  private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
   private static final String RUN_AT = "RUN_AT";
   private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   private static final String SCHEDULER = "scheduler";
-  private static final String TODO_WEBHOOK_URL = "https://discord.com/api/webhooks/1477708589400588561/OeRjqcWc4MLPtRQ1RBiLpY2R5VbSqMmLO50aEMDnRpjHqEVyniJefCKBxFrUS2TPEWoZ";
+  private static final String DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
+  private static final String TODO_WEBHOOK_URL = "TODO_WEBHOOK_URL";
   
   public static void main(String[] args) {
     Path envPath = Env.findEnvFile();
@@ -38,14 +38,13 @@ public class Main {
 
     String openAiApiKey = Env.getRequired(OPENAI_API_KEY, dotenv);
 
-    String webhookUrl = Env.getRequired(DISCORD_WEBHOOK_URL, dotenv);
     
-    DiscordNotifier notifier = new DiscordNotifier(webhookUrl);
+    DiscordNotifier notifier = new DiscordNotifier(Env.getRequired(DISCORD_WEBHOOK_URL, dotenv));
+    DiscordNotifier todoNotifier = new DiscordNotifier(Env.getRequired(TODO_WEBHOOK_URL, dotenv));
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
     PremarketStockRoutine premarketStockRoutine = new PremarketStockRoutine(notifier, openAiApiClient);
-    TodoChronRoutine todoRoutine = new TodoChronRoutine(new DiscordNotifier(TODO_WEBHOOK_URL));
+    TodoChronRoutine todoRoutine = new TodoChronRoutine(todoNotifier);
 
-    notifier.send("🟢 Sanity check log, pi is operational");
 
     var exec = Executors.newSingleThreadScheduledExecutor(r -> {
       Thread t = new Thread(r);
@@ -56,14 +55,19 @@ public class Main {
 
     DailyScheduler scheduler = new DailyScheduler(exec);
 
+
     scheduler.scheduleDaily(runAt, zone, List.of(WEEKEND_DAYS), List.of(HOLIDAYS), () -> {
       LocalDate day = LocalDate.now(zone).minusDays(1); // "yesterday"
       premarketStockRoutine.run(day);
     });
 
+    notifier.send("🟢 Sanity check log, pi is operational");
+
     scheduler.scheduleDaily(LocalTime.of(6, 0), zone, List.of(WEEKEND_DAYS), List.of(), () -> {
       LocalDate day = LocalDate.now(zone).minusDays(1);
       todoRoutine.run(day);
     });
+
+    todoNotifier.send("Sanity check for todo routine");
   }
 }
