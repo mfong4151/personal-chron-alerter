@@ -58,19 +58,19 @@ public class Main {
 
 
     scheduler.scheduleDaily(runAt, zone, List.of(WEEKEND_DAYS), List.of(HOLIDAYS), () -> {
-      LocalDate day = LocalDate.now(zone).minusDays(1); // "yesterday"
+      LocalDate day = LocalDate.now(zone);
       premarketStockRoutine.run(day);
     });
     
     scheduler.scheduleDaily(LocalTime.of(15, 30), zone, List.of(WEEKDAY_DAYS, Set.of(DayOfWeek.SATURDAY)), List.of(), () -> {
-      LocalDate day = LocalDate.now(zone).minusDays(1);
+      LocalDate day = LocalDate.now(zone);
       sundayMarketRoutine.run(day);
     });
 
     notifier.send("🟢 Sanity check log, pi is operational");
 
     scheduler.scheduleDaily(LocalTime.of(6, 0), zone, List.of(WEEKEND_DAYS), List.of(), () -> {
-      LocalDate day = LocalDate.now(zone).minusDays(1);
+      LocalDate day = LocalDate.now(zone);
       todoRoutine.run(day);
     });
 
