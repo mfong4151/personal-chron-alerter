@@ -32,11 +32,15 @@ public final class PromptUtils {
     return out;
   }
 
-  public static String getStockGapPrompt(){
+  public static String getStockGapPrompt(String premarketCondition){
 
+    String today = LocalDate.now().toString();
     String roleText = loadResource(STOCK_RESEARCH_ROLE_PATH);
-    String promptText1 = String.format(loadResource(STOCK_ALERTS_PROMPT_PATH), LocalDate.now().toString() );
-    String promptText2 = "Also " +  loadResource(STOCK_GAP_ALERTS_PROMPT_PATH);
+    String promptText1 = render(loadResource(STOCK_ALERTS_PROMPT_PATH), Map.of(
+        "date", today,
+        "condition", premarketCondition));
+    String promptText2 = "Also " + render(loadResource(STOCK_GAP_ALERTS_PROMPT_PATH),
+        Map.of("date", today));
     return String.join(LINE_BREAK, roleText, promptText1, promptText2);
   }
 

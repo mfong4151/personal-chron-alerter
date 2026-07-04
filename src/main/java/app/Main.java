@@ -6,6 +6,8 @@ import java.util.concurrent.Executors;
 
 
 import app.clients.OpenAiApiClient;
+import app.clients.MassiveApiClient;
+import app.market.PremarketGapService;
 import app.routines.PremarketStockRoutine;
 import app.routines.SundayMarketRoutine;
 import app.routines.TodoChronRoutine;
@@ -21,6 +23,9 @@ public class Main {
   private static final String DEFAULT_RUN_AT = "06:30";
   private static final String APP_TZ = "APP_TZ";
   private static final String OPENAI_API_KEY = "OPENAI_API_KEY"; 
+  private static final String MASSIVE_API_KEY = "MASSIVE_API_KEY";
+  private static final String PREMARKET_GAP_THRESHOLD_PCT = "PREMARKET_GAP_THRESHOLD_PCT";
+  private static final double DEFAULT_GAP_THRESHOLD_PCT = 0.5;
   private static final String RUN_AT = "RUN_AT";
   private static final String DEFAULT_TIMEZONE = "America/Los_Angeles";
   private static final String SCHEDULER = "scheduler";
@@ -38,12 +43,18 @@ public class Main {
         Env.getOrDefault(RUN_AT, dotenv, DEFAULT_RUN_AT));
 
     String openAiApiKey = Env.getRequired(OPENAI_API_KEY, dotenv);
+    String massiveApiKey = Env.getRequired(MASSIVE_API_KEY, dotenv);
+    double gapThresholdPct = Double.parseDouble(
+        Env.getOrDefault(PREMARKET_GAP_THRESHOLD_PCT, dotenv,
+            Double.toString(DEFAULT_GAP_THRESHOLD_PCT)));
 
     
     DiscordNotifier notifier = new DiscordNotifier(Env.getRequired(DISCORD_WEBHOOK_URL, dotenv));
     DiscordNotifier todoNotifier = new DiscordNotifier(Env.getRequired(TODO_WEBHOOK_URL, dotenv));
     OpenAiApiClient openAiApiClient = new OpenAiApiClient(openAiApiKey);
-    PremarketStockRoutine premarketStockRoutine = new PremarketStockRoutine(notifier, openAiApiClient);
+    MassiveApiClient massiveApiClient = new MassiveApiClient(massiveApiKey);
+    PremarketGapService premarketGapService = new PremarketGapService(massiveApiClient, gapThresholdPct);
+    PremarketStockRoutine premarketStockRoutine = new PremarketStockRoutine(notifier, openAiApiClient, premarketGapService);
     SundayMarketRoutine sundayMarketRoutine = new SundayMarketRoutine(notifier, openAiApiClient);
     TodoChronRoutine todoRoutine = new TodoChronRoutine(todoNotifier);
 

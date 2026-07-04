@@ -2,6 +2,22 @@
 
 Current state: needs a chatgpt integration
 
+## Configuration (.env)
+
+| Variable | Required | Default | Purpose |
+| --- | --- | --- | --- |
+| `DISCORD_WEBHOOK_URL` | yes | — | Discord webhook for market alerts |
+| `TODO_WEBHOOK_URL` | yes | — | Discord webhook for the todo routine |
+| `OPENAI_API_KEY` | yes | — | OpenAI API key (cause research) |
+| `MASSIVE_API_KEY` | yes | — | Massive/Polygon key used to compute the premarket QQQ/SPY gap |
+| `PREMARKET_GAP_THRESHOLD_PCT` | no | `0.5` | Abs % move (either direction) that counts as a notable premarket gap |
+| `APP_TZ` | no | `America/Los_Angeles` | Scheduler timezone |
+| `RUN_AT` | no | `06:30` | Premarket routine run time |
+
+The premarket routine now measures the QQQ/SPY gap directly from market data
+(`MassiveApiClient`) instead of asking OpenAI to determine it, then tells OpenAI
+whether the move is above/below the threshold and asks it to research causes.
+
 ## TODO
 
 - Integrate chatgpt api, LOE 1 day 
@@ -72,6 +88,8 @@ On your dev machine:
 scp build/libs/*-all.jar mfong415@192.168.1.47:/home/mfong415/chron/chron.jar
 
 On the Pi:
+ssh mfong415@192.168.1.47
+
 sudo systemctl restart chron
 
 
