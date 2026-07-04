@@ -37,7 +37,7 @@ public final class PremarketStockRoutine implements ChronRoutine{
     public void run(LocalDate day) {
         final PremarketAssessment assessment = premarketGapService.assess();
 
-        if (!assessment.breached()) {
+        if (!assessment.isBreached()) {
             notifier.send(NO_GAP_MESSAGE);
             return;
         }

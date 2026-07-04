@@ -69,10 +69,10 @@ public final class PremarketGapService {
     List<PremarketGap> gaps = fetchIndexGaps();
 
     boolean hasAnyData = gaps.stream().anyMatch(PremarketGap::hasData);
-    boolean breached = hasAnyData
+    boolean isBreached = hasAnyData
         && gaps.stream().anyMatch(g -> g.breachesThreshold(thresholdPct));
 
-    return new PremarketAssessment(breached, describeCondition(gaps, hasAnyData, breached));
+    return new PremarketAssessment(isBreached, describeCondition(gaps, hasAnyData, isBreached));
   }
 
   /**
@@ -80,7 +80,7 @@ public final class PremarketGapService {
    * condition for QQQ and SPY relative to the threshold. This is injected into
    * the research prompt so the LLM only has to explain causes, not detect the move.
    */
-  private String describeCondition(List<PremarketGap> gaps, boolean hasAnyData, boolean breached) {
+  private String describeCondition(List<PremarketGap> gaps, boolean hasAnyData, boolean isBreached) {
     if (!hasAnyData) {
       return String.format(Locale.US,
           "No premarket data is available for QQQ or SPY yet (market closed or "
@@ -102,7 +102,7 @@ public final class PremarketGapService {
     }
     sb.append(String.join("; ", parts)).append(". ");
 
-    if (breached) {
+    if (isBreached) {
       sb.append(String.format(Locale.US,
           "This is ABOVE the %.2f%% threshold — a notable premarket gap.", thresholdPct));
     } else {
