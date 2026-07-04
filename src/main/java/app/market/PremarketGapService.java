@@ -20,25 +20,33 @@ public final class PremarketGapService {
   private static final String SNAPSHOT_PATH =
       "/v2/snapshot/locale/us/markets/stocks/tickers/";
 
-  private final MassiveApiClient client;
+  private static final String TICKER_NODE = "ticker";
+  private static final String PREV_DAY_NODE = "prevDay";
+  private static final String MIN_NODE = "min";
+  private static final String CLOSE_FIELD = "c";
+
+  private static final double NO_PRICE = 0.0;
+  private static final double PCT_MULTIPLIER = 100.0;
+
+  private final MassiveApiClient massiveApiClient;
   private final double thresholdPct;
 
-  public PremarketGapService(MassiveApiClient client, double thresholdPct) {
-    this.client = client;
+  public PremarketGapService(MassiveApiClient massiveApiClient, double thresholdPct) {
+    this.massiveApiClient = massiveApiClient;
     this.thresholdPct = thresholdPct;
   }
 
   /** Fetch and compute the premarket gap for a single ticker. */
   public PremarketGap fetchGap(String ticker) {
-    JsonNode root = client.get(SNAPSHOT_PATH + ticker);
-    JsonNode t = root.path("ticker");
+    JsonNode root = massiveApiClient.get(SNAPSHOT_PATH + ticker);
+    JsonNode t = root.path(TICKER_NODE);
 
-    double prevClose = t.path("prevDay").path("c").asDouble(0.0);
-    double lastPrice = t.path("min").path("c").asDouble(0.0);
+    double prevClose = t.path(PREV_DAY_NODE).path(CLOSE_FIELD).asDouble(NO_PRICE);
+    double lastPrice = t.path(MIN_NODE).path(CLOSE_FIELD).asDouble(NO_PRICE);
 
     Double gapPct = null;
-    if (prevClose > 0.0 && lastPrice > 0.0) {
-      gapPct = (lastPrice - prevClose) / prevClose * 100.0;
+    if (prevClose > NO_PRICE && lastPrice > NO_PRICE) {
+      gapPct = (lastPrice - prevClose) / prevClose * PCT_MULTIPLIER;
     }
     return new PremarketGap(ticker, prevClose, lastPrice, gapPct);
   }
@@ -53,22 +61,32 @@ public final class PremarketGapService {
   }
 
   /**
+   * Fetches the current index gaps and evaluates them against the threshold.
+   * The returned assessment reports whether any ticker breached the threshold
+   * and carries a human-readable condition summary for the research prompt.
+   */
+  public PremarketAssessment assess() {
+    List<PremarketGap> gaps = fetchIndexGaps();
+
+    boolean hasAnyData = gaps.stream().anyMatch(PremarketGap::hasData);
+    boolean breached = hasAnyData
+        && gaps.stream().anyMatch(g -> g.breachesThreshold(thresholdPct));
+
+    return new PremarketAssessment(breached, describeCondition(gaps, hasAnyData, breached));
+  }
+
+  /**
    * Builds a human-readable, factual statement of the current premarket
    * condition for QQQ and SPY relative to the threshold. This is injected into
    * the research prompt so the LLM only has to explain causes, not detect the move.
    */
-  public String describeCondition() {
-    List<PremarketGap> gaps = fetchIndexGaps();
-
-    boolean anyData = gaps.stream().anyMatch(PremarketGap::hasData);
-    if (!anyData) {
+  private String describeCondition(List<PremarketGap> gaps, boolean hasAnyData, boolean breached) {
+    if (!hasAnyData) {
       return String.format(Locale.US,
           "No premarket data is available for QQQ or SPY yet (market closed or "
               + "before premarket). Treat this as no move past the %.2f%% threshold.",
           thresholdPct);
     }
-
-    boolean anyBreach = gaps.stream().anyMatch(g -> g.breachesThreshold(thresholdPct));
 
     StringBuilder sb = new StringBuilder();
     sb.append(String.format(Locale.US, "Premarket move (threshold %.2f%%): ", thresholdPct));
@@ -84,7 +102,7 @@ public final class PremarketGapService {
     }
     sb.append(String.join("; ", parts)).append(". ");
 
-    if (anyBreach) {
+    if (breached) {
       sb.append(String.format(Locale.US,
           "This is ABOVE the %.2f%% threshold — a notable premarket gap.", thresholdPct));
     } else {

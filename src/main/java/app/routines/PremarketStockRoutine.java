@@ -6,6 +6,7 @@ import com.openai.models.ChatModel;
 
 import app.DiscordNotifier;
 import app.clients.OpenAiApiClient;
+import app.market.PremarketAssessment;
 import app.market.PremarketGapService;
 import app.utils.PromptUtils;
 
@@ -18,6 +19,9 @@ import app.utils.PromptUtils;
 * Packaging the message into something intelligble for discord to send to my private server
 */
 public final class PremarketStockRoutine implements ChronRoutine{
+    private static final String NO_GAP_MESSAGE =
+        "Pre market price was not above your threshold.";
+
     private final DiscordNotifier notifier;
     private final OpenAiApiClient openAiApiClient;
     private final PremarketGapService premarketGapService;
@@ -31,8 +35,14 @@ public final class PremarketStockRoutine implements ChronRoutine{
 
     @Override
     public void run(LocalDate day) {
-        final String condition = premarketGapService.describeCondition();
-        final String prompt = PromptUtils.getStockGapPrompt(condition);
+        final PremarketAssessment assessment = premarketGapService.assess();
+
+        if (!assessment.breached()) {
+            notifier.send(NO_GAP_MESSAGE);
+            return;
+        }
+
+        final String prompt = PromptUtils.getStockGapPrompt(assessment.description());
         final String result = OpenAiApiClient.fromChatGptResponseToString( 
           openAiApiClient.getChatGPTResponse(prompt, ChatModel.GPT_5_2)
         );
